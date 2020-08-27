@@ -18,9 +18,8 @@ try:
     cursor=connection.cursor()
     print(connection.version)
     
-    sql_fetch ="""SELECT * from ( select start_date, ict, season_antecedent,\
-        description_constraints, MAX(START_DATE) over(PARTITION BY id) max_date \
-            from ict_constraint_data)WHERE start_DATE = MAX_DATE"""
+    sql_fetch ="""select * from ict_constraint_data \
+        where start_date IN (select start_date as s from ict_constraint_data where rownum<2)"""
     cursor.execute("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD' ")
     df= pd.read_sql(sql_fetch, con=connection)
     
@@ -41,4 +40,5 @@ for i in df.index:
         'description': df['DESCRIPTION_CONSTRAINTS'][i]
     }
     ictConstraintsData.append(tempDict)
-print(ictConstraintsData)
+    
+print(len(ictConstraintsData))
